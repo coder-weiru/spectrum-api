@@ -1,0 +1,8 @@
+# code_snippet spring properties start
+spring:
+  profiles: dev, sys, uat
+  
+  application:
+    name: spectrum-api
+    
+# code_snippet spring properties end
