@@ -1,8 +1,0 @@
-# Api properties start
-
-api:
-    search:
-         caseSensitive: false
-         pageSize: 20
-                              
-# Api properties end

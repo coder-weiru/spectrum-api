@@ -9,10 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
+import li.spectrum.data.dbclient.DatabaseContext;
+
 @Configuration
-@EnableConfigurationProperties(ApiProperties.class)
 @ComponentScan(basePackageClasses = AppConfig.class)
-@Import(SwaggerConfig.class)
+@Import({ SwaggerConfig.class, DatabaseContext.class })
+@EnableConfigurationProperties(ApiProperties.class)
 public class AppConfig {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);

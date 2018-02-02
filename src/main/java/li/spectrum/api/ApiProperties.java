@@ -1,33 +1,42 @@
 package li.spectrum.api;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-@Profile({ "dev", "sys", "uat" })
+@Configuration
 @ConfigurationProperties(prefix = "api")
-
 public class ApiProperties {
 
-	private Map<String, Object> search = new HashMap<String, Object>();
+	public static class Search {
+		private boolean caseSensitive;
+		private int pageSize;
 
-	public Map<String, Object> getSearch() {
+		public boolean isCaseSensitive() {
+			return caseSensitive;
+		}
+
+		public void setCaseSensitive(boolean caseSensitive) {
+			this.caseSensitive = caseSensitive;
+		}
+
+		public int getPageSize() {
+			return pageSize;
+		}
+
+		public void setPageSize(int pageSize) {
+			this.pageSize = pageSize;
+		}
+
+	}
+
+	private Search search;
+
+	public Search getSearch() {
 		return search;
 	}
 
-	public void setSearch(Map<String, Object> search) {
+	public void setSearch(Search search) {
 		this.search = search;
 	}
 
-	public boolean getSearchCaseSensitive() {
-		return (boolean) search.get("caseSensitive");
-	}
-
-	public int getSearchPageSize() {
-		return (int) search.get("pageSize");
-	}
 }

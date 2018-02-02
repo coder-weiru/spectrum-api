@@ -24,6 +24,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>li.spectrum.data</groupId>
+			<artifactId>spectrum-data</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-context</artifactId>
 		</dependency>
