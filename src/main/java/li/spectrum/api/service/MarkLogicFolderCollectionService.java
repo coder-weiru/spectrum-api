@@ -8,14 +8,15 @@ import org.springframework.util.Assert;
 
 import com.marklogic.client.pojo.PojoPage;
 import com.marklogic.client.pojo.PojoQueryBuilder;
-import com.marklogic.client.pojo.PojoQueryDefinition;
 import com.marklogic.client.pojo.PojoRepository;
+import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
 import li.spectrum.data.model.FileModel;
 import li.spectrum.data.model.Folder;
 import li.spectrum.data.model.FolderCollection;
+import li.spectrum.data.model.builder.FolderCollectionBuilder;
 
 @Service
 public class MarkLogicFolderCollectionService implements FolderCollectionService {
@@ -35,34 +36,31 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	}
 
 	@Override
-	public FolderCollection getAllFolders() throws ApiServiceException {
+	public FolderCollection getAllFolders(long start) throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
-		PojoQueryDefinition query = qb.containerQuery("file",
+		StructuredQueryDefinition query = qb.containerQuery("file",
 				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
+
+		if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
+			query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
+		}
+
 		repository.setPageLength(apiProperties.getSearch().getPageSize());
 
-		FolderCollection folderCollection = new FolderCollection();
-		PojoPage<FileModel> matches;
-		int start = 1;
-		do {
-			matches = repository.search(query, start);
-			logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
+		PojoPage<FileModel> matches = repository.search(query, start);
 
-			if (matches.hasContent()) {
-				while (matches.hasNext()) {
-					FileModel fm = matches.next();
-					folderCollection.add((Folder) fm.getFile());
-				}
-			} else {
-				logger.debug("  No matches");
-			}
+		logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
 
-			start += matches.size();
-
-		} while (matches.hasNextPage());
-
-		return folderCollection;
+		FolderCollection fc = null;
+		if (matches.hasContent()) {
+			FolderCollectionBuilder fcb = new FolderCollectionBuilder();
+			fcb.setFileModelPaGE(matches);
+			fc = fcb.build();
+		} else {
+			logger.debug("  No matches");
+		}
+		return fc;
 	}
 
 }

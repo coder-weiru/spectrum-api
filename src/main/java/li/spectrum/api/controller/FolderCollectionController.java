@@ -12,9 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -48,13 +50,17 @@ public class FolderCollectionController {
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not Found"), 
 			@ApiResponse(code = 500, message = "Failure") })
-	public ResponseEntity<?> getAllFolders() throws IOException {
-
-		FolderCollection folderCollection = folderCollectionService.getAllFolders();
-		if (folderCollection.isEmpty()) {
-			return ResponseEntity.notFound().build();
+	public ResponseEntity<?> getAllFolders(@RequestParam(value = "start", required = false) String start)
+			throws IOException {
+		long startNum = 1L;
+		if (!StringUtils.isEmpty(start)) {
+			startNum = Long.valueOf(start);
 		}
-		return ResponseEntity.ok(folderCollection);
+		FolderCollection folderCollection = folderCollectionService.getAllFolders(startNum);
+		if (folderCollection.hasContent()) {
+			return ResponseEntity.ok(folderCollection);
+		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@ExceptionHandler(Exception.class)

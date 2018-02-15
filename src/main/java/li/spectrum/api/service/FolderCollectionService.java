@@ -5,6 +5,6 @@ import li.spectrum.data.model.FolderCollection;
 
 public interface FolderCollectionService {
 
-	FolderCollection getAllFolders() throws ApiServiceException;
+	FolderCollection getAllFolders(long start) throws ApiServiceException;
 
 }
