@@ -12,6 +12,8 @@ public class ApiProperties {
 		private int pageSize;
 		private boolean includeHiddenFolder;
 		private boolean includeHiddenFile;
+		private boolean includeFolderOfHiddenFolder;
+		private boolean includeFileOfHiddenFolder;
 
 		public boolean isCaseSensitive() {
 			return caseSensitive;
@@ -43,6 +45,22 @@ public class ApiProperties {
 
 		public void setIncludeHiddenFile(boolean includeHiddenFile) {
 			this.includeHiddenFile = includeHiddenFile;
+		}
+
+		public boolean isIncludeFolderOfHiddenFolder() {
+			return includeFolderOfHiddenFolder;
+		}
+
+		public void setIncludeFolderOfHiddenFolder(boolean includeFolderOfHiddenFolder) {
+			this.includeFolderOfHiddenFolder = includeFolderOfHiddenFolder;
+		}
+
+		public boolean isIncludeFileOfHiddenFolder() {
+			return includeFileOfHiddenFolder;
+		}
+
+		public void setIncludeFileOfHiddenFolder(boolean includeFileOfHiddenFolder) {
+			this.includeFileOfHiddenFolder = includeFileOfHiddenFolder;
 		}
 
 	}

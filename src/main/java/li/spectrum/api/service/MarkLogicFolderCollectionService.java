@@ -46,9 +46,15 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 			if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
 			}
+			if (!apiProperties.getSearch().isIncludeFolderOfHiddenFolder()) {
+				query = qb.and(query, qb.containerQuery("file", qb.value("parentHidden", Boolean.FALSE)));
+			}
 		} else {
 			if (!includeHidden) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
+				if (!apiProperties.getSearch().isIncludeFolderOfHiddenFolder()) {
+					query = qb.and(query, qb.containerQuery("file", qb.value("parentHidden", Boolean.FALSE)));
+				}
 			}
 		}
 
