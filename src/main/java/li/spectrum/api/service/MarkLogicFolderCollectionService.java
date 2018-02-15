@@ -36,14 +36,20 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	}
 
 	@Override
-	public FolderCollection getAllFolders(long start) throws ApiServiceException {
+	public FolderCollection getAllFolders(Long start, Boolean includeHidden) throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
 		StructuredQueryDefinition query = qb.containerQuery("file",
 				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
 
-		if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
-			query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
+		if (includeHidden == null) {
+			if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
+				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
+			}
+		} else {
+			if (!includeHidden) {
+				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
+			}
 		}
 
 		repository.setPageLength(apiProperties.getSearch().getPageSize());
