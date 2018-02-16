@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.marklogic.client.pojo.PojoPage;
 import com.marklogic.client.pojo.PojoQueryBuilder;
@@ -36,11 +37,15 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	}
 
 	@Override
-	public FolderCollection getAllFolders(Long start, Boolean includeHidden) throws ApiServiceException {
+	public FolderCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
 		StructuredQueryDefinition query = qb.containerQuery("file",
 				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
+
+		if (!StringUtils.isEmpty(matchTerm)) {
+			query = qb.and(query, qb.term("path", matchTerm));
+		}
 
 		if (includeHidden == null) {
 			if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
@@ -64,13 +69,13 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 
 		logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
 
-		FolderCollection fc = null;
+		FolderCollection fc = FolderCollection.emptyCollection();
 		if (matches.hasContent()) {
 			FolderCollectionBuilder fcb = new FolderCollectionBuilder();
 			fcb.setFileModelPaGE(matches);
 			fc = fcb.build();
 		} else {
-			logger.debug("  No matches");
+			logger.debug("No matches.");
 		}
 		return fc;
 	}

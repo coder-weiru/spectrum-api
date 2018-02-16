@@ -50,7 +50,8 @@ public class FolderCollectionController {
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not Found"), 
 			@ApiResponse(code = 500, message = "Failure") })
-	public ResponseEntity<?> getAllFolders(@RequestParam(value = "start", required = false) String start,
+	public ResponseEntity<?> getFolders(@RequestParam(value = "term", required = false) String term,
+			@RequestParam(value = "start", required = false) String start,
 			@RequestParam(value = "includeHidden", required = false) String includeHidden)
 			throws IOException {
 		long startNum = 1L;
@@ -61,7 +62,7 @@ public class FolderCollectionController {
 		if (!StringUtils.isEmpty(includeHidden)) {
 			includeHiddenBool = Boolean.valueOf(includeHidden);
 		}
-		FolderCollection folderCollection = folderCollectionService.getAllFolders(startNum, includeHiddenBool);
+		FolderCollection folderCollection = folderCollectionService.getFolders(term, startNum, includeHiddenBool);
 		if (folderCollection.hasContent()) {
 			return ResponseEntity.ok(folderCollection);
 		}

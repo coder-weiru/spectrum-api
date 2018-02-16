@@ -5,6 +5,6 @@ import li.spectrum.data.model.FolderCollection;
 
 public interface FolderCollectionService {
 
-	FolderCollection getAllFolders(Long start, Boolean includeHidden) throws ApiServiceException;
+	FolderCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException;
 
 }
