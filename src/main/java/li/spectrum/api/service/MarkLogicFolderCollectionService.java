@@ -1,5 +1,7 @@
 package li.spectrum.api.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +42,27 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	public FolderCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
+		// File type is 'Folder'
 		StructuredQueryDefinition query = qb.containerQuery("file",
 				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
 
+		// If term is specified, matching term in the path
 		if (!StringUtils.isEmpty(matchTerm)) {
 			query = qb.and(query, qb.term("path", matchTerm));
 		}
 
+		// Exclude folders or their parent folders that match specified ignore folders
+		List<String> ignoreFolders = apiProperties.getSearch().getIgnore().getFolders();
+		if (!ignoreFolders.isEmpty()) {
+			String[] flds = new String[ignoreFolders.size()];
+			flds = ignoreFolders.toArray(flds);
+            
+			query = qb.andNot(query, qb.value("name", flds));	
+			// parent folders that match ignore folders should be excluded as well
+			query = qb.andNot(query, qb.word("parentFolders", flds));
+		}
+		
+		// Exclude hidden folders
 		if (includeHidden == null) {
 			if (!apiProperties.getSearch().isIncludeHiddenFolder()) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));

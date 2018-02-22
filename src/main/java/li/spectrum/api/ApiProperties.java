@@ -1,5 +1,7 @@
 package li.spectrum.api;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -7,6 +9,19 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "api")
 public class ApiProperties {
 
+	public static class Ignore {
+		private List<String> folders;
+
+		public List<String> getFolders() {
+			return folders;
+		}
+
+		public void setFolders(List<String> folders) {
+			this.folders = folders;
+		}
+		
+	}
+	
 	public static class Search {
 		private boolean caseSensitive;
 		private int pageSize;
@@ -14,7 +29,8 @@ public class ApiProperties {
 		private boolean includeHiddenFile;
 		private boolean includeFolderOfHiddenFolder;
 		private boolean includeFileOfHiddenFolder;
-
+		private Ignore ignore;
+		
 		public boolean isCaseSensitive() {
 			return caseSensitive;
 		}
@@ -61,6 +77,14 @@ public class ApiProperties {
 
 		public void setIncludeFileOfHiddenFolder(boolean includeFileOfHiddenFolder) {
 			this.includeFileOfHiddenFolder = includeFileOfHiddenFolder;
+		}
+
+		public Ignore getIgnore() {
+			return ignore;
+		}
+
+		public void setIgnore(Ignore ignore) {
+			this.ignore = ignore;
 		}
 
 	}
