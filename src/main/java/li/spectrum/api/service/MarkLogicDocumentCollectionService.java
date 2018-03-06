@@ -16,14 +16,14 @@ import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
+import li.spectrum.data.model.DocumentCollection;
+import li.spectrum.data.model.File;
 import li.spectrum.data.model.FileModel;
-import li.spectrum.data.model.Folder;
-import li.spectrum.data.model.FolderCollection;
-import li.spectrum.data.model.builder.FolderCollectionBuilder;
+import li.spectrum.data.model.builder.DocumentCollectionBuilder;
 
 @Service
-public class MarkLogicFolderCollectionService implements FolderCollectionService {
-	private static final Logger logger = LoggerFactory.getLogger(MarkLogicFolderCollectionService.class);
+public class MarkLogicDocumentCollectionService implements DocumentCollectionService {
+	private static final Logger logger = LoggerFactory.getLogger(MarkLogicDocumentCollectionService.class);
 
 	@Autowired
 	private ApiProperties apiProperties;
@@ -32,48 +32,47 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	private PojoRepository<FileModel, String> repository;
 
 	@Autowired
-	public MarkLogicFolderCollectionService(PojoRepository<FileModel, String> repository) {
+	public MarkLogicDocumentCollectionService(PojoRepository<FileModel, String> repository) {
 		super();
 		Assert.notNull(repository, "'PojoRepository<FileModel, String>' must not be null");
 		this.repository = repository;
 	}
 
 	@Override
-	public FolderCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException {
+	public DocumentCollection getDocuments(String matchTerm, Long start, Boolean includeHidden)
+			throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
-		// File type is 'Folder'
+		// File type is 'File'
 		StructuredQueryDefinition query = qb.containerQuery("file",
-				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
+				qb.containerQuery("_metadata", qb.value("type", File.class.getSimpleName())));
 
 		// If term is specified, matching term in the path
 		if (!StringUtils.isEmpty(matchTerm)) {
-			query = qb.and(query, qb.term("path", matchTerm));
+			query = qb.and(query, qb.term("name", matchTerm));
 		}
 
-		// Exclude folders or their parent folders that match specified ignore folders
-		List<String> ignoreFolders = apiProperties.getSearch().getIgnore().getFolders();
-		if (!ignoreFolders.isEmpty()) {
-			String[] flds = new String[ignoreFolders.size()];
-			flds = ignoreFolders.toArray(flds);
+		// Exclude files that match specified ignore patterns
+		List<String> ignoreFiles = apiProperties.getSearch().getIgnore().getFiles();
+		if (!ignoreFiles.isEmpty()) {
+			String[] files = new String[ignoreFiles.size()];
+			files = ignoreFiles.toArray(files);
             
-			query = qb.andNot(query, qb.value("name", flds));	
-			// parent folders that match ignore folders should be excluded as well
-			query = qb.andNot(query, qb.word("parentFolders", flds));
+			query = qb.andNot(query, qb.value("name", files));
 		}
 		
 		// Exclude hidden folders
 		if (includeHidden == null) {
-			if (!apiProperties.getSearch().isIncludeHiddenFolders()) {
+			if (!apiProperties.getSearch().isIncludeHiddenFiles()) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
 			}
-			if (!apiProperties.getSearch().isIncludeHiddenChildFolders()) {
+			if (!apiProperties.getSearch().isIncludeHiddenChildFiles()) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("parentHidden", Boolean.FALSE)));
 			}
 		} else {
 			if (!includeHidden) {
 				query = qb.and(query, qb.containerQuery("file", qb.value("hidden", Boolean.FALSE)));
-				if (!apiProperties.getSearch().isIncludeHiddenChildFolders()) {
+				if (!apiProperties.getSearch().isIncludeHiddenChildFiles()) {
 					query = qb.and(query, qb.containerQuery("file", qb.value("parentHidden", Boolean.FALSE)));
 				}
 			}
@@ -85,15 +84,15 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 
 		logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
 
-		FolderCollection fc = FolderCollection.emptyCollection();
+		DocumentCollection dc = DocumentCollection.emptyCollection();
 		if (matches.hasContent()) {
-			FolderCollectionBuilder fcb = new FolderCollectionBuilder();
-			fcb.setFileModelPage(matches);
-			fc = fcb.build();
+			DocumentCollectionBuilder dcb = new DocumentCollectionBuilder();
+			dcb.setFileModelPage(matches);
+			dc = dcb.build();
 		} else {
 			logger.debug("No matches.");
 		}
-		return fc;
+		return dc;
 	}
 
 }

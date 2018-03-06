@@ -24,27 +24,27 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.api.service.FolderCollectionService;
+import li.spectrum.api.service.DocumentCollectionService;
+import li.spectrum.data.model.DocumentCollection;
 import li.spectrum.data.model.FolderCollection;
 
 @RestController
-@Api(value = "Folder Collection API", produces = "application/hal+json")
-@RequestMapping("/folders")
-public class FolderCollectionController {
+@Api(value = "Document Collection API", produces = "application/hal+json")
+@RequestMapping("/documents")
+public class DocumentCollectionController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FolderCollectionController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentCollectionController.class);
 
-	private FolderCollectionService folderCollectionService;
-
+	private DocumentCollectionService documentCollectionService;
 	@Autowired
-	public FolderCollectionController(FolderCollectionService folderCollectionService) {
-		Assert.notNull(folderCollectionService, "'folderCollectionService' must not be null");
-		this.folderCollectionService = folderCollectionService;
+	public DocumentCollectionController(DocumentCollectionService documentCollectionService) {
+		Assert.notNull(documentCollectionService, "'documentCollectionService' must not be null");
+		this.documentCollectionService = documentCollectionService;
 	}
 
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Returns the folders with name matches specified terms.", 
-				  notes = "Returns the folders with name matches specified terms.")
+	@ApiOperation(value = "Returns the documents with document name matching specified term.", 
+	              notes = "Returns the documents with document name matching specified term.")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = FolderCollection.class),
 			@ApiResponse(code = 400, message = "Input Validation Error"),
 			@ApiResponse(code = 401, message = "Unauthorized"), 
@@ -63,9 +63,9 @@ public class FolderCollectionController {
 		if (!StringUtils.isEmpty(includeHidden)) {
 			includeHiddenBool = Boolean.valueOf(includeHidden);
 		}
-		FolderCollection folderCollection = folderCollectionService.getFolders(term, startNum, includeHiddenBool);
-		if (folderCollection.hasContent()) {
-			return ResponseEntity.ok(folderCollection);
+		DocumentCollection documentCollection = documentCollectionService.getDocuments(term, startNum, includeHiddenBool);
+		if (documentCollection.hasContent()) {
+			return ResponseEntity.ok(documentCollection);
 		}
 		return ResponseEntity.notFound().build();
 	}

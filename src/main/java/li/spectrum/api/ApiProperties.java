@@ -11,6 +11,7 @@ public class ApiProperties {
 
 	public static class Ignore {
 		private List<String> folders;
+		private List<String> files;
 
 		public List<String> getFolders() {
 			return folders;
@@ -19,17 +20,73 @@ public class ApiProperties {
 		public void setFolders(List<String> folders) {
 			this.folders = folders;
 		}
-		
+
+		public List<String> getFiles() {
+			return files;
+		}
+
+		public void setFiles(List<String> files) {
+			this.files = files;
+		}
 	}
 	
+	public static class Hidden {
+		private boolean folders;
+		private boolean files;
+		private boolean childFolders;
+		private boolean childFiles;
+
+		public boolean isFolders() {
+			return folders;
+		}
+
+		public void setFolders(boolean folders) {
+			this.folders = folders;
+		}
+
+		public boolean isFiles() {
+			return files;
+		}
+
+		public void setFiles(boolean files) {
+			this.files = files;
+		}
+
+		public boolean isChildFolders() {
+			return childFolders;
+		}
+
+		public void setChildFolders(boolean childFolders) {
+			this.childFolders = childFolders;
+		}
+
+		public boolean isChildFiles() {
+			return childFiles;
+		}
+
+		public void setChildFiles(boolean childFiles) {
+			this.childFiles = childFiles;
+		}
+
+	}
+
+	public static class Include {
+		private Hidden hidden;
+
+		public Hidden getHidden() {
+			return hidden;
+		}
+
+		public void setHidden(Hidden hidden) {
+			this.hidden = hidden;
+		}
+	}
+
 	public static class Search {
 		private boolean caseSensitive;
 		private int pageSize;
-		private boolean includeHiddenFolder;
-		private boolean includeHiddenFile;
-		private boolean includeFolderOfHiddenFolder;
-		private boolean includeFileOfHiddenFolder;
 		private Ignore ignore;
+		private Include include;
 		
 		public boolean isCaseSensitive() {
 			return caseSensitive;
@@ -47,36 +104,12 @@ public class ApiProperties {
 			this.pageSize = pageSize;
 		}
 
-		public boolean isIncludeHiddenFolder() {
-			return includeHiddenFolder;
+		public Include getInclude() {
+			return include;
 		}
 
-		public void setIncludeHiddenFolder(boolean includeHiddenFolder) {
-			this.includeHiddenFolder = includeHiddenFolder;
-		}
-
-		public boolean isIncludeHiddenFile() {
-			return includeHiddenFile;
-		}
-
-		public void setIncludeHiddenFile(boolean includeHiddenFile) {
-			this.includeHiddenFile = includeHiddenFile;
-		}
-
-		public boolean isIncludeFolderOfHiddenFolder() {
-			return includeFolderOfHiddenFolder;
-		}
-
-		public void setIncludeFolderOfHiddenFolder(boolean includeFolderOfHiddenFolder) {
-			this.includeFolderOfHiddenFolder = includeFolderOfHiddenFolder;
-		}
-
-		public boolean isIncludeFileOfHiddenFolder() {
-			return includeFileOfHiddenFolder;
-		}
-
-		public void setIncludeFileOfHiddenFolder(boolean includeFileOfHiddenFolder) {
-			this.includeFileOfHiddenFolder = includeFileOfHiddenFolder;
+		public void setInclude(Include include) {
+			this.include = include;
 		}
 
 		public Ignore getIgnore() {
@@ -87,6 +120,21 @@ public class ApiProperties {
 			this.ignore = ignore;
 		}
 
+		public boolean isIncludeHiddenFiles() {
+			return getInclude().getHidden().isFiles();
+		}
+
+		public boolean isIncludeHiddenFolders() {
+			return getInclude().getHidden().isFolders();
+		}
+
+		public boolean isIncludeHiddenChildFiles() {
+			return getInclude().getHidden().isChildFiles();
+		}
+
+		public boolean isIncludeHiddenChildFolders() {
+			return getInclude().getHidden().isChildFolders();
+		}
 	}
 
 	private Search search;
