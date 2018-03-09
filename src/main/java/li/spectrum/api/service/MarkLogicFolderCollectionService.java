@@ -87,9 +87,7 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 
 		FolderCollection fc = FolderCollection.emptyCollection();
 		if (matches.hasContent()) {
-			FolderCollectionBuilder fcb = new FolderCollectionBuilder();
-			fcb.setFileModelPage(matches);
-			fc = fcb.build();
+			fc = FolderCollectionBuilder.newBuilder().setFileModelPage(matches).build();
 		} else {
 			logger.debug("No matches.");
 		}

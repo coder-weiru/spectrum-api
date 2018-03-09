@@ -24,34 +24,33 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.api.service.DocumentCollectionService;
-import li.spectrum.data.model.DocumentCollection;
+import li.spectrum.api.service.FileExplorerService;
+import li.spectrum.data.model.FileCollection;
 import li.spectrum.data.model.FolderCollection;
 
 @RestController
-@Api(value = "Document Collection API", produces = "application/hal+json")
-@RequestMapping("/documents")
-public class DocumentCollectionController {
+@Api(value = "File Explorer API", produces = "application/hal+json")
+@RequestMapping("/files")
+public class FileExplorerController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentCollectionController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileExplorerController.class);
 
-	private DocumentCollectionService documentCollectionService;
+	private FileExplorerService fileExplorerService;
 	@Autowired
-	public DocumentCollectionController(DocumentCollectionService documentCollectionService) {
-		Assert.notNull(documentCollectionService, "'documentCollectionService' must not be null");
-		this.documentCollectionService = documentCollectionService;
+	public FileExplorerController(FileExplorerService fileExplorerService) {
+		Assert.notNull(fileExplorerService, "'fileExplorerService' must not be null");
+		this.fileExplorerService = fileExplorerService;
 	}
 
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Returns the documents with document name matching specified term.", 
-	              notes = "Returns the documents with document name matching specified term.")
+	@ApiOperation(value = "Returns the files and folders under the specified folder directory. If the root folder is not specified, returns the files and folders under the folder with the shortest path.", notes = "Returns the files and folders under the specified folder directory. If the root folder is not specified, returns the files and folders under the folder with the shortest path.")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = FolderCollection.class),
 			@ApiResponse(code = 400, message = "Input Validation Error"),
 			@ApiResponse(code = 401, message = "Unauthorized"), 
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not Found"), 
 			@ApiResponse(code = 500, message = "Failure") })
-	public ResponseEntity<?> getDocuments(@RequestParam(value = "term", required = false) String term,
+	public ResponseEntity<?> getFiles(@RequestParam(value = "folder", required = false) String folder,
 			@RequestParam(value = "start", required = false) String start,
 			@RequestParam(value = "includeHidden", required = false) String includeHidden)
 			throws IOException {
@@ -63,9 +62,9 @@ public class DocumentCollectionController {
 		if (!StringUtils.isEmpty(includeHidden)) {
 			includeHiddenBool = Boolean.valueOf(includeHidden);
 		}
-		DocumentCollection documentCollection = documentCollectionService.getDocuments(term, startNum, includeHiddenBool);
-		if (documentCollection.hasContent()) {
-			return ResponseEntity.ok(documentCollection);
+		FileCollection fileCollection = fileExplorerService.getFiles(folder, startNum, includeHiddenBool);
+		if (fileCollection.hasContent()) {
+			return ResponseEntity.ok(fileCollection);
 		}
 		return ResponseEntity.notFound().build();
 	}

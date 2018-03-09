@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.marklogic.client.pojo.PojoPage;
 import com.marklogic.client.pojo.PojoQueryBuilder;
@@ -16,14 +15,13 @@ import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.data.model.DocumentCollection;
-import li.spectrum.data.model.File;
+import li.spectrum.data.model.FileCollection;
 import li.spectrum.data.model.FileModel;
-import li.spectrum.data.model.builder.DocumentCollectionBuilder;
+import li.spectrum.data.model.builder.FileCollectionBuilder;
 
 @Service
-public class MarkLogicDocumentCollectionService implements DocumentCollectionService {
-	private static final Logger logger = LoggerFactory.getLogger(MarkLogicDocumentCollectionService.class);
+public class MarkLogicFileExplorerService implements FileExplorerService {
+	private static final Logger logger = LoggerFactory.getLogger(MarkLogicFileExplorerService.class);
 
 	@Autowired
 	private ApiProperties apiProperties;
@@ -32,32 +30,25 @@ public class MarkLogicDocumentCollectionService implements DocumentCollectionSer
 	private PojoRepository<FileModel, String> repository;
 
 	@Autowired
-	public MarkLogicDocumentCollectionService(PojoRepository<FileModel, String> repository) {
+	public MarkLogicFileExplorerService(PojoRepository<FileModel, String> repository) {
 		super();
 		Assert.notNull(repository, "'PojoRepository<FileModel, String>' must not be null");
 		this.repository = repository;
 	}
 
 	@Override
-	public DocumentCollection getDocuments(String matchTerm, Long start, Boolean includeHidden)
+	public FileCollection getFiles(String folder, Long start, Boolean includeHidden)
 			throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
-		// File type is 'File'
-		StructuredQueryDefinition query = qb.containerQuery("file",
-				qb.containerQuery("_metadata", qb.value("type", File.class.getSimpleName())));
-
-		// If term is specified, matching term in the path
-		if (!StringUtils.isEmpty(matchTerm)) {
-			query = qb.and(query, qb.term("name", matchTerm));
-		}
+		// File path matches anything directly under specified folder
+		StructuredQueryDefinition query = qb.value("parentPath", folder);
 
 		// Exclude files that match specified ignore patterns
 		List<String> ignoreFiles = apiProperties.getSearch().getIgnore().getFiles();
 		if (!ignoreFiles.isEmpty()) {
 			String[] files = new String[ignoreFiles.size()];
 			files = ignoreFiles.toArray(files);
-            
 			query = qb.andNot(query, qb.value("name", files));
 		}
 		
@@ -84,13 +75,13 @@ public class MarkLogicDocumentCollectionService implements DocumentCollectionSer
 
 		logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
 
-		DocumentCollection dc = DocumentCollection.emptyCollection();
+		FileCollection fc = FileCollection.emptyCollection();
 		if (matches.hasContent()) {
-			dc = DocumentCollectionBuilder.newBuilder().setFileModelPage(matches).build();
+			fc = FileCollectionBuilder.newBuilder().setFileModelPage(matches).build();
 		} else {
-			logger.debug("No matches.");
+			logger.debug("Empty folder %s", folder);
 		}
-		return dc;
+		return fc;
 	}
 
 }
