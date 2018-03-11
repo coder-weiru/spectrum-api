@@ -15,9 +15,9 @@ import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.data.model.FileCollection;
+import li.spectrum.api.model.FileCollection;
+import li.spectrum.api.model.builder.FileCollectionBuilder;
 import li.spectrum.data.model.FileModel;
-import li.spectrum.data.model.builder.FileCollectionBuilder;
 
 @Service
 public class MarkLogicFileExplorerService implements FileExplorerService {

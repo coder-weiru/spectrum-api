@@ -16,14 +16,14 @@ import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
+import li.spectrum.api.model.DirectoryCollection;
+import li.spectrum.api.model.builder.DirectoryCollectionBuilder;
 import li.spectrum.data.model.FileModel;
 import li.spectrum.data.model.Folder;
-import li.spectrum.data.model.FolderCollection;
-import li.spectrum.data.model.builder.FolderCollectionBuilder;
 
 @Service
-public class MarkLogicFolderCollectionService implements FolderCollectionService {
-	private static final Logger logger = LoggerFactory.getLogger(MarkLogicFolderCollectionService.class);
+public class MarkLogicDirectoryCollectionService implements DirectoryCollectionService {
+	private static final Logger logger = LoggerFactory.getLogger(MarkLogicDirectoryCollectionService.class);
 
 	@Autowired
 	private ApiProperties apiProperties;
@@ -32,19 +32,18 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 	private PojoRepository<FileModel, String> repository;
 
 	@Autowired
-	public MarkLogicFolderCollectionService(PojoRepository<FileModel, String> repository) {
+	public MarkLogicDirectoryCollectionService(PojoRepository<FileModel, String> repository) {
 		super();
 		Assert.notNull(repository, "'PojoRepository<FileModel, String>' must not be null");
 		this.repository = repository;
 	}
 
 	@Override
-	public FolderCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException {
+	public DirectoryCollection getFolders(String matchTerm, Long start, Boolean includeHidden) throws ApiServiceException {
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
 		// File type is 'Folder'
-		StructuredQueryDefinition query = qb.containerQuery("file",
-				qb.containerQuery("_metadata", qb.value("type", Folder.class.getSimpleName())));
+		StructuredQueryDefinition query = qb.containerQuery("file", qb.value("type", Folder.class.getSimpleName()));
 
 		// If term is specified, matching term in the path
 		if (!StringUtils.isEmpty(matchTerm)) {
@@ -85,9 +84,9 @@ public class MarkLogicFolderCollectionService implements FolderCollectionService
 
 		logger.debug("Results " + start + " thru " + (start + matches.size() - 1));
 
-		FolderCollection fc = FolderCollection.emptyCollection();
+		DirectoryCollection fc = DirectoryCollection.emptyCollection();
 		if (matches.hasContent()) {
-			fc = FolderCollectionBuilder.newBuilder().setFileModelPage(matches).build();
+			fc = DirectoryCollectionBuilder.newBuilder().setFileModelPage(matches).build();
 		} else {
 			logger.debug("No matches.");
 		}

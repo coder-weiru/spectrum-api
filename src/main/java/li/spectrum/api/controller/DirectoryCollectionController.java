@@ -1,5 +1,8 @@
 package li.spectrum.api.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,34 +27,34 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.api.service.FolderCollectionService;
-import li.spectrum.data.model.FolderCollection;
+import li.spectrum.api.model.Directory;
+import li.spectrum.api.model.DirectoryCollection;
+import li.spectrum.api.service.DirectoryCollectionService;
 
 @RestController
-@Api(value = "Folder Collection API", produces = "application/hal+json")
-@RequestMapping("/folders")
-public class FolderCollectionController {
+@Api(value = "Directory Collection API", produces = "application/hal+json")
+@RequestMapping("/directories")
+public class DirectoryCollectionController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FolderCollectionController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryCollectionController.class);
 
-	private FolderCollectionService folderCollectionService;
+	private DirectoryCollectionService directoryCollectionService;
 
 	@Autowired
-	public FolderCollectionController(FolderCollectionService folderCollectionService) {
-		Assert.notNull(folderCollectionService, "'folderCollectionService' must not be null");
-		this.folderCollectionService = folderCollectionService;
+	public DirectoryCollectionController(DirectoryCollectionService directoryCollectionService) {
+		Assert.notNull(directoryCollectionService, "'directoryCollectionService' must not be null");
+		this.directoryCollectionService = directoryCollectionService;
 	}
 
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Returns the folders with name matches specified terms.", 
-				  notes = "Returns the folders with name matches specified terms.")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = FolderCollection.class),
+	@ApiOperation(value = "Returns the directories with name matches specified terms.", notes = "Returns the directories with name matches specified terms.")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = DirectoryCollection.class),
 			@ApiResponse(code = 400, message = "Input Validation Error"),
 			@ApiResponse(code = 401, message = "Unauthorized"), 
 			@ApiResponse(code = 403, message = "Forbidden"),
 			@ApiResponse(code = 404, message = "Not Found"), 
 			@ApiResponse(code = 500, message = "Failure") })
-	public ResponseEntity<?> getFolders(@RequestParam(value = "term", required = false) String term,
+	public ResponseEntity<?> getDirectories(@RequestParam(value = "term", required = false) String term,
 			@RequestParam(value = "start", required = false) String start,
 			@RequestParam(value = "includeHidden", required = false) String includeHidden)
 			throws IOException {
@@ -63,9 +66,17 @@ public class FolderCollectionController {
 		if (!StringUtils.isEmpty(includeHidden)) {
 			includeHiddenBool = Boolean.valueOf(includeHidden);
 		}
-		FolderCollection folderCollection = folderCollectionService.getFolders(term, startNum, includeHiddenBool);
-		if (folderCollection.hasContent()) {
-			return ResponseEntity.ok(folderCollection);
+		DirectoryCollection directoryCollection = directoryCollectionService.getFolders(term, startNum, includeHiddenBool);
+		if (directoryCollection.hasContent()) {
+			directoryCollection.getDirectories().forEach(resource -> {
+				if (resource instanceof Directory) {
+					Directory dir = (Directory) resource;
+					String dirName = dir.getFolder().getCanonicalPath();
+					resource.add(linkTo(methodOn(FileExplorerController.class).getFiles(dirName, "0",
+							includeHidden == null ? "false" : "true")).withSelfRel());
+				}
+			});
+			return ResponseEntity.ok(directoryCollection);
 		}
 		return ResponseEntity.notFound().build();
 	}

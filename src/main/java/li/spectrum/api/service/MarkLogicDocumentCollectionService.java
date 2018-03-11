@@ -16,10 +16,10 @@ import com.marklogic.client.query.StructuredQueryDefinition;
 
 import li.spectrum.api.ApiProperties;
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.data.model.DocumentCollection;
+import li.spectrum.api.model.DocumentCollection;
+import li.spectrum.api.model.builder.DocumentCollectionBuilder;
 import li.spectrum.data.model.File;
 import li.spectrum.data.model.FileModel;
-import li.spectrum.data.model.builder.DocumentCollectionBuilder;
 
 @Service
 public class MarkLogicDocumentCollectionService implements DocumentCollectionService {
@@ -44,8 +44,7 @@ public class MarkLogicDocumentCollectionService implements DocumentCollectionSer
 		PojoQueryBuilder<FileModel> qb = repository.getQueryBuilder();
 
 		// File type is 'File'
-		StructuredQueryDefinition query = qb.containerQuery("file",
-				qb.containerQuery("_metadata", qb.value("type", File.class.getSimpleName())));
+		StructuredQueryDefinition query = qb.containerQuery("file", qb.value("type", File.class.getSimpleName()));
 
 		// If term is specified, matching term in the path
 		if (!StringUtils.isEmpty(matchTerm)) {

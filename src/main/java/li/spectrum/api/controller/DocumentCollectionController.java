@@ -24,9 +24,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import li.spectrum.api.exception.ApiServiceException;
+import li.spectrum.api.model.DocumentCollection;
+import li.spectrum.api.model.DirectoryCollection;
 import li.spectrum.api.service.DocumentCollectionService;
-import li.spectrum.data.model.DocumentCollection;
-import li.spectrum.data.model.FolderCollection;
 
 @RestController
 @Api(value = "Document Collection API", produces = "application/hal+json")
@@ -45,7 +45,7 @@ public class DocumentCollectionController {
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ApiOperation(value = "Returns the documents with document name matching specified term.", 
 	              notes = "Returns the documents with document name matching specified term.")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = FolderCollection.class),
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success", response = DirectoryCollection.class),
 			@ApiResponse(code = 400, message = "Input Validation Error"),
 			@ApiResponse(code = 401, message = "Unauthorized"), 
 			@ApiResponse(code = 403, message = "Forbidden"),

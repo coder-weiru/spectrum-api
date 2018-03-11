@@ -1,7 +1,7 @@
 package li.spectrum.api.service;
 
 import li.spectrum.api.exception.ApiServiceException;
-import li.spectrum.data.model.DocumentCollection;
+import li.spectrum.api.model.DocumentCollection;
 
 public interface DocumentCollectionService {
 
