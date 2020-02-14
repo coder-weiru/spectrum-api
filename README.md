@@ -1,2 +1,2 @@
-# spectrum-api
-Data API module for Spectrum
+# spectrum-service-api
+Service API module for Spectrum
